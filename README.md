@@ -34,5 +34,7 @@ Andrew Ng.
 
 ## Reference
 Sequential Minimal Optimization- A Fast Algorithm for Training Support Vector Machines
+
 Improvements to platt's SMO algorithm for SVM classifier design
+
 CS 229, Autumn 2009 | The Simplified SMO Algorithm
