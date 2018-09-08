@@ -1,34 +1,19 @@
 # SVM ALGORITHM
 
-## preprocess.py:
-Input: raw data
-
-Output: document term matrix
-
-Overview: Contains functions that takes the raw data and produces document-term matrix
-
 ## SVM.py:
-Input: document-term matrix
-
-Output: trained model and predictions with model
-
-Overview: Contains an svm class use to build, train and predict a given data set. It also has a function
+* Input: document-term matrix
+* Output: trained model and predictions with model
+* Overview: Contains an svm class use to build, train and predict a given data set. It also has a function
             for creating the confusion matrix
 
 ## Packages:
 The following packages are required:
+* numpy for scientific computing
+* pandas for loading files
+* scipy for mathematics, science and engineering calculations
 
-numpy for scientific computing
 
-pandas for loading files
-
-scipy for mathematics, science and engineering calculations
-
-nltk for natural language processing
-
-scikit-learn for machine learning algorithms
-
-# CITATIONS:
+## CITATIONS:
 I consulted a matlab code from Machine Learning course on coursera taught by Stanford University professor
 Andrew Ng.
 
