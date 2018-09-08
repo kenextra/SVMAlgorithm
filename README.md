@@ -9,7 +9,6 @@
 ## Packages:
 The following packages are required:
 * numpy for scientific computing
-* pandas for loading files
 * scipy for mathematics, science and engineering calculations
 
 
