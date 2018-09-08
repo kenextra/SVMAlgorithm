@@ -33,7 +33,7 @@ I consulted a matlab code from Machine Learning course on coursera taught by Sta
 Andrew Ng.
 
 ## Reference
-Sequential Minimal Optimization- A Fast Algorithm for Training Support Vector Machines
+* [Sequential Minimal Optimization- A Fast Algorithm for Training Support Vector Machines](https://www.microsoft.com/en-us/research/publication/sequential-minimal-optimization-a-fast-algorithm-for-training-support-vector-machines/)
 
 Improvements to platt's SMO algorithm for SVM classifier design
 
