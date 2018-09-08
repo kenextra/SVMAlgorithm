@@ -34,7 +34,4 @@ Andrew Ng.
 
 ## Reference
 * [Sequential Minimal Optimization- A Fast Algorithm for Training Support Vector Machines](https://www.microsoft.com/en-us/research/publication/sequential-minimal-optimization-a-fast-algorithm-for-training-support-vector-machines/)
-
-Improvements to platt's SMO algorithm for SVM classifier design
-
-CS 229, Autumn 2009 | The Simplified SMO Algorithm
+* [CS 229, Autumn 2009 | The Simplified SMO Algorithm](http://cs229.stanford.edu/materials/smo.pdf)
