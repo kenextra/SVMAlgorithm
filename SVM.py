@@ -1,5 +1,4 @@
 import numpy as np
-from numpy import linalg
 
 
 def confusion_matrix(y_actual, y_predicted):
@@ -37,18 +36,31 @@ def polynomial_kernel(x, y, p=3):
 
 
 def gaussian_kernel(x, y, sigma=5.0):
-    return np.exp(-linalg.norm(x-y)**2 / (2 * (sigma ** 2)))
+    numerator = np.linalg.norm(x-y)**2
+    denominator = 2 * (sigma ** 2)
+    return np.exp(-numerator / denominator)
 
 
 class SVM(object):
 
-    def __init__(self, kernel=linear_kernel, tol=1e-3, C=0.1, max_passes=5):
+    def __init__(self, kernel=linear_kernel, tol=1e-3, C=0.1,
+                 max_passes=5, sigma=0.1):
 
         self.kernel = kernel
         self.tol = tol
         self.C = C
         self.max_passes = max_passes
+        self.sigma = sigma
         self.model = dict()
+
+    def __repr__(self):
+        return (f"{self.__class__.__name__}("
+                f"kernel={self.kernel.__name__}, "
+                f"tol={self.tol}, "
+                f"C={self.C}, "
+                f"max_passes={self.max_passes}, "
+                f"sigma={self.sigma}"
+                ")")
 
     def svmTrain(self, X, Y):
         # Data parameters
@@ -64,20 +76,20 @@ class SVM(object):
         passes = 0
 
         # Pre-compute the kernel matrix
-        if self.kernel == linear_kernel:
-            print('Pre-computing the kernel matrix')
+        if self.kernel.__name__ == 'linear_kernel':
+            print(f'Pre-computing {self.kernel.__name__} matrix')
             K = X @ X.T
 
-        elif self.kernel == gaussian_kernel:
-            print('Pre-computing the kernel matrix')
+        elif self.kernel.__name__ == 'gaussian_kernel':
+            print(f'Pre-computing {self.kernel.__name__} matrix')
             X2 = np.sum(np.power(X, 2), axis=1).reshape(-1, 1)
             K = X2 + (X2.T - (2 * (X @ X.T)))
-            K = np.power(self.kernel(1, 0), K)
+            K = np.power(self.kernel(1, 0, self.sigma), K)
 
         else:
             # Pre-compute the Kernel Matrix
             # The following can be slow due to lack of vectorization
-            print('Pre-computing the kernel matrix')
+            print(f'Pre-computing {self.kernel.__name__} matrix')
             K = np.zeros((m, m))
 
             for i in range(m):
@@ -95,7 +107,7 @@ class SVM(object):
 
             for i in range(m):
 
-                E[i] = b + np.sum( alphas * Y * K[:, i].reshape(-1, 1)) - Y[i]
+                E[i] = b + np.sum(alphas * Y * K[:, i].reshape(-1, 1)) - Y[i]
 
                 if (Y[i] * E[i] < -self.tol and alphas[i] < self.C) or (Y[i] * E[i] > self.tol and alphas[i] > 0):
                     j = np.random.randint(0, m)
@@ -103,7 +115,8 @@ class SVM(object):
                         # make sure i is not equal to j
                         j = np.random.randint(0, m)
 
-                    E[j] = b + np.sum(alphas * Y * K[:, j].reshape(-1, 1)) - Y[j]
+                    E[j] = b + np.sum(alphas * Y *
+                                      K[:, j].reshape(-1, 1)) - Y[j]
 
                     # Save old alphas
                     alpha_i_old = alphas[i, 0]
@@ -141,12 +154,15 @@ class SVM(object):
                         continue
 
                     # Determine value for alpha i using (16)
-                    alphas[i] = alphas[i] + Y[i] * Y[j] * (alpha_j_old - alphas[j])
+                    alphas[i] = alphas[i] + Y[i] * \
+                        Y[j] * (alpha_j_old - alphas[j])
 
                     # Compute b1 and b2 using (17) and (18) respectively.
-                    b1 = b - E[i] - Y[i] * (alphas[i] - alpha_i_old) * K[i, j] - Y[j] * (alphas[j] - alpha_j_old) * K[i, j]
+                    b1 = b - E[i] - Y[i] * (alphas[i] - alpha_i_old) * \
+                        K[i, j] - Y[j] * (alphas[j] - alpha_j_old) * K[i, j]
 
-                    b2 = b - E[j] - Y[i] * (alphas[i] - alpha_i_old) * K[i, j] - Y[j] * (alphas[j] - alpha_j_old) * K[j, j]
+                    b2 = b - E[j] - Y[i] * (alphas[i] - alpha_i_old) * \
+                        K[i, j] - Y[j] * (alphas[j] - alpha_j_old) * K[j, j]
 
                     # Compute b by (19).
                     if 0 < alphas[i] < self.C:
@@ -162,9 +178,9 @@ class SVM(object):
             else:
                 passes = 0
 
-            print('.....')
+            print('.', end='', flush=True)
 
-        print(' DONE! ')
+        print('\n DONE! ')
 
         # Save the model
         idx = alphas > 0
@@ -185,16 +201,17 @@ class SVM(object):
         p = np.zeros((m, 1))
         pred = np.zeros((m, 1))
 
-        if self.model['kernelFunction'] == linear_kernel:
+        if self.model['kernelFunction'].__name__ == 'linear_kernel':
             p = X.dot(self.model['w']) + self.model['b']
 
-        elif self.model['kernelFunction'] == gaussian_kernel:
+        elif self.model['kernelFunction'].__name__ == 'gaussian_kernel':
             # Vectorized RBF Kernel
-            # This is equivalent to computing the kernel on every pair of examples
+            # This is equivalent to computing the kernel
+            # on every pair of examples
             X1 = np.sum(np.power(X, 2), axis=1).reshape(-1, 1)
             X2 = np.transpose(np.sum(np.power(self.model['X'], 2), axis=1))
             K = X1 + (X2.T - (2 * (X @ (self.model['X']).T)))
-            K = np.power(self.model['kernelFunction'](1, 0), K)
+            K = np.power(self.model['kernelFunction'](1, 0, self.sigma), K)
             K = np.transpose(self.model['y']) * K
             K = np.transpose(self.model['alphas']) * K
             p = np.sum(K, axis=1)
@@ -204,12 +221,51 @@ class SVM(object):
                 prediction = 0
                 for j in range(self.model['X'].shape[0]):
                     prediction = prediction + self.model['alphas'][j] \
-                                 * self.model['y'][j] * \
-                                 self.model['kernelFunction'](np.transpose(X[i, :]), np.transpose(self.model['X'][j, :]))
+                        * self.model['y'][j] * \
+                        self.model['kernelFunction'](np.transpose(
+                            X[i, :]), np.transpose(self.model['X'][j, :]))
 
                 p[i] = prediction + self.model['b']
 
         # Convert predictions into 0 and 1
         pred[p >= 0] = 1
-        pred[p < 0] = 0
+        return pred
+
+    def predict(self, X):
+        if X.shape[1] == 1:
+            X = np.transpose(X)
+
+        # Dataset
+        m = X.shape[0]
+        p = np.zeros((m, 1))
+        pred = np.zeros((m, 1))
+
+        if self.model['kernelFunction'].__name__ == 'linear_kernel':
+            p = X.dot(self.model['w']) + self.model['b']
+
+        elif self.model['kernelFunction'].__name__ == 'gaussian_kernel':
+            # Vectorized RBF Kernel
+            # This is equivalent to computing the kernel
+            # on every pair of examples
+            X1 = np.sum(np.power(X, 2), axis=1).reshape(-1, 1)
+            X2 = np.transpose(np.sum(np.power(self.model['X'], 2), axis=1))
+            K = X1 + (X2.T - (2 * (X @ (self.model['X']).T)))
+            K = np.power(self.model['kernelFunction'](1, 0, self.sigma), K)
+            K = np.transpose(self.model['y']) * K
+            K = np.transpose(self.model['alphas']) * K
+            p = np.sum(K, axis=1)
+
+        else:
+            for i in range(m):
+                prediction = 0
+                for j in range(self.model['X'].shape[0]):
+                    prediction = prediction + self.model['alphas'][j] \
+                        * self.model['y'][j] * \
+                        self.model['kernelFunction'](np.transpose(
+                            X[i, :]), np.transpose(self.model['X'][j, :]))
+
+                p[i] = prediction + self.model['b']
+
+        # Convert predictions into 0 and 1
+        pred[p >= 0] = 1
         return pred
